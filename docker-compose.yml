@@ -10,10 +10,26 @@ services:
       dockerfile: docker/php/Dockerfile
     image: php-app
     restart: unless-stopped
-    tty: true
+    healthcheck:
+      test: [ "CMD-SHELL", "cgi-fcgi -bind -connect localhost:9000" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
-      SERVICE_NAME: app
-      SERVICE_TAGS: dev
+      - SERVICE_NAME=app
+      - SERVICE_TAGS=dev
+      - APP_DEBUG=false
+      - APP_ENV=prod
+      - LOG_CHANNEL=stderr
+      - APP_KEY=base64:8Ri1abSttK9unoAf5qBK/orrTXPiKyAByFWmGeltRac=
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=laravel
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - APP_URL=${APP_URL}
+
     working_dir: /var/www
 
     volumes:
@@ -24,7 +40,6 @@ services:
       - internet
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
 
   # Nginx Service
   nginx:
@@ -58,10 +73,49 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  db:
+    image: public.ecr.aws/docker/library/mysql:latest
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: laravel
+    networks:
+      - internet
+
+    ports:
+      - "${DB_PORT}:3306"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 0:8080
+    depends_on:
+      - db
+    command:
+      [
+        "php",
+        "-d",
+        "upload_max_filesize = 10G",
+        "-d",
+        "post_max_size = 10G",
+        "-S",
+        "[::]:8080",
+        "-t",
+        "/var/www/html"
+      ]
+    networks:
+      - internet
 
 # Network
 networks:
   internet:
 
 
-
+volumes:
+  dbdata:
