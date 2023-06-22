@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessPhoto;
-use App\Models\Label;
 use App\Models\Photo;
 use App\Models\Tag;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Carbon\Carbon;
-
 
 class UploadController extends Controller
 {
@@ -25,7 +23,7 @@ class UploadController extends Controller
             'Upload/Upload',
             [
                 // lazy load tags on reload
-                'tags' => Inertia::lazy(fn () => Tag::select('id', 'name', 'slug')->get())
+                'tags' => Inertia::lazy(fn() => Tag::select('id', 'name', 'slug')->get()),
             ]
         );
     }
@@ -54,7 +52,7 @@ class UploadController extends Controller
             '*.tempId' => 'required|integer',
             '*.title' => 'required|string',
             '*.size' => 'required|integer',
-            '*.ext' => 'required|in:jpg,jpeg,png,psd'
+            '*.ext' => 'required|in:jpg,jpeg,png,psd',
 
         ]);
         // will save the file id as an array
@@ -62,7 +60,7 @@ class UploadController extends Controller
         // we will use this token to match the correct
         // photo id
         $resp_data = [];
-        $s3Client = new \Aws\S3\S3Client([
+        $s3Client = new \Aws\S3\S3Client ([
             'region' => config('filesystems.disks.s3_fullsize.region'),
             'version' => '2006-03-01',
         ]);
@@ -70,7 +68,7 @@ class UploadController extends Controller
 
         foreach ($files as $file) {
             $fileName = bin2hex(random_bytes(32)) . '.' . $file['ext'];
-            $id =  Photo::create([
+            $id = Photo::create([
                 'title' => $file['title'],
                 'user_id' => Auth::user()->id,
                 'size' => $file['size'],
@@ -83,13 +81,13 @@ class UploadController extends Controller
                 'Bucket' => $bucketName,
                 'Key' => 'full_size/' . $fileName,
                 // 'ContentType' => 'image/jpeg', //enforce content type in future
-                'Region' => 'ap-southeast-1'
+                'Region' => 'ap-southeast-1',
 
             ]);
 
             $request = $s3Client->createPresignedRequest($cmd, now()->addMinutes(20));
             // Get the actual presigned-url
-            $presignedUrl = (string)$request->getUri();
+            $presignedUrl = (string) $request->getUri();
 
             array_push($resp_data, ['tempId' => $file['tempId'], 'id' => $id, 'uploadUrl' => $presignedUrl]);
         }
@@ -102,14 +100,14 @@ class UploadController extends Controller
             'token' => 'required|string',
             'title' => 'string',
             'description' => 'string',
-            'tags' => 'exists:tags,id'
+            'tags' => 'exists:tags,id',
         ]);
         $photo = Photo::where('token', '=', $data['token'])->get();
         if (!$photo) {
             // if photo doesn't exist then we should create the photo
             $photo = Photo::create([
                 'token' => $data['token'],
-                'title' => $data['title'] ? $data['title'] : ''
+                'title' => $data['title'] ? $data['title'] : '',
             ]);
         }
         // if tags are supplied then we sync it with pivot table
@@ -128,7 +126,7 @@ class UploadController extends Controller
     {
         $data = $request->validate([
             // 'ids' => 'required|array',
-            "id" => "required|exists:photos,id"
+            "id" => "required|exists:photos,id",
         ]);
         //foreach ($data['ids'] as $id) {
         ProcessPhoto::dispatch($data['id']);
@@ -163,13 +161,12 @@ class UploadController extends Controller
         $photo = Photo::where("id", $data['id'])->first();
         $photo->update([
 
-
             'size' => $data['file']->getSize(),
             'height' => $imgsize[1],
             'width' => $imgsize[0],
             'file_type' => $data['file']->getClientMimeType(),
 
-            'should_process' => False,
+            'should_process' => false,
 
         ]);
 
@@ -220,7 +217,6 @@ class UploadController extends Controller
 
         return response('', 200);
     }
-
 
     public function updateDetails(Request $request)
     {

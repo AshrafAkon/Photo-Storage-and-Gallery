@@ -18,16 +18,16 @@ class UserSeeder extends Seeder
         User::create([
 
             'name' => 'Admin',
-            'email' => 'gallery_admin@example.com',
-            'password' => Hash::make('KzH5HJ#J^BEfJkeNBlkjndfgjkluihre'),
-            'role_id' => 1
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
+            'role_id' => 1,
 
         ]);
         User::create([
             'name' => 'John Doe',
             'email' => 'user@example.com',
-            'password' => Hash::make('photo@12345pass!'),
-            'role_id' => 2
+            'password' => Hash::make('password'),
+            'role_id' => 2,
         ]);
     }
 }

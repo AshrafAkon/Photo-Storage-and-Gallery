@@ -26,7 +26,7 @@ class PhotoTagTest extends DuskTestCase
     public function test_adding_tag_using_tag_input_box_in_photoview()
     {
         $user = User::factory()->create([
-            'email' => 'testing_user@example.com'
+            'email' => 'testing_user@example.com',
         ]);
         $this->artisan('db:seed --class=PhotoSeeder');
 
@@ -34,7 +34,6 @@ class PhotoTagTest extends DuskTestCase
             $photo = Photo::latest()->first();
             $this->assertNotNull($photo);
             $addTagButtonSelector = "button[title='Add tag']";
-
 
             $tagInputFieldName = 'tag-input';
             // $newTagSelectorInTagList = "a[href*='tags/{$this->testing_tag}']";
@@ -53,12 +52,11 @@ class PhotoTagTest extends DuskTestCase
         });
     }
 
-
     public function test_open_photo_from_tag_attached_photos()
     {
 
         $user = User::factory()->create([
-            'email' => 'testing_user@example.com'
+            'email' => 'testing_user@example.com',
         ]);
         $this->artisan('db:seed --class=PhotoSeeder');
         $this->browse(function (Browser $browser) use ($user) {
@@ -76,7 +74,7 @@ class PhotoTagTest extends DuskTestCase
                 ->loginAs($user)
                 ->pause(3000)
                 ->visitRoute('tags.index')
-                ->waitFor('.main div h2',)
+                ->waitFor('.main div h2', )
                 ->assertSee('Popular tags')
                 ->assertSee($this->testing_tag) // check if selected tag is in the tag list
                 ->click($this->newTagSelectorInTagList) // clicking the tag to view all associated photos of that tag
@@ -86,7 +84,7 @@ class PhotoTagTest extends DuskTestCase
                 // clicking on the parent element
                 ->script(
                     'document.querySelector("' . $uploaded_photo_thumb_in_gallery_selector . '").parentElement.click();'
-                );  // clicking the photo from gallery view of selected tag
+                ); // clicking the photo from gallery view of selected tag
 
             $photoviewPhotoSelector = "img[src*='preview_photos/{$photo->file_name}']";
             $browser->waitFor($photoviewPhotoSelector) // waiting for preview-photo to be loaded
@@ -94,11 +92,10 @@ class PhotoTagTest extends DuskTestCase
         });
     }
 
-
     public function test_delete_tag_from_photo()
     {
         $user = User::factory()->create([
-            'email' => 'testing_user@example.com'
+            'email' => 'testing_user@example.com',
         ]);
         $this->artisan('db:seed --class=PhotoSeeder');
 
@@ -126,7 +123,7 @@ class PhotoTagTest extends DuskTestCase
                 ->waitFor($photoviewPhotoSelector)
                 ->assertVisible($photoviewPhotoSelector)
                 ->assertVisible($this->showDetailsButtonSelector)
-                //->click($this->showDetailsButtonSelector)
+            //->click($this->showDetailsButtonSelector)
                 ->waitFor($this->tagInputSelector)
                 ->waitFor($this->newTagSelectorInTagList, 10)
                 ->assertVisible($this->newTagSelectorInTagList)
