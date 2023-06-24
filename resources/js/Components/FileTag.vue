@@ -1,51 +1,24 @@
 <template>
     <div class="js-tags tags">
-        <div
-            v-if="$page.props.user"
-            class="js-tags__form tags__form"
-            action="#"
-        >
+        <div v-if="$page.props.user" class="js-tags__form tags__form" action="#">
             <div class="input-group mt-1 mb-3">
-                <input
-                    name="tag-input"
-                    list="tag-list"
-                    class="js-tags__input form-control form-control-lg"
-                    type="text"
-                    placeholder="Specify tag"
-                    autocomplete="off"
-                    ref="tag-input"
-                    v-on:keyup.enter="addTag"
-                />
-                <button
-                    title="Add tag"
-                    class="btn btn-lg btn-outline-secondary"
-                    type="submit"
-                    v-on:click="addTag"
-                >
+                <input name="tag-input" list="tag-list" class="js-tags__input form-control form-control-lg" type="text"
+                    placeholder="Specify tag" autocomplete="off" ref="tag-input" v-on:keyup.enter="addTag" />
+                <button title="Add tag" class="btn btn-lg btn-outline-secondary" type="submit" v-on:click="addTag">
                     Add
                 </button>
             </div>
         </div>
         <div class="js-tags__list tags__list">
-            <inertia-link
-                class="tags__tag tag tag_deletable btn btn-secondary"
-                :href="genTagRoute(tag.slug)"
-                v-for="(tag, index) in tags"
-                :key="tag.id"
-            >
+            <Link class="tags__tag tag tag_deletable btn btn-secondary" :href="genTagRoute(tag.slug)"
+                v-for="(tag, index) in tags" :key="tag.id">
                 {{ tag.name }}
 
-                <button
-                    v-if="$page.props.user"
-                    title="Delete tag"
-                    type="button"
-                    class="js-tag-delete tag__delete btn-close"
-                    aria-label="Delete tag"
-                    v-on:click="removeTag($event, tag, index)"
-                >
+                <button v-if="$page.props.user" title="Delete tag" type="button" class="js-tag-delete tag__delete btn-close"
+                    aria-label="Delete tag" v-on:click="removeTag($event, tag, index)">
                     <span class="visually-hidden">Delete tag</span>
                 </button>
-            </inertia-link>
+            </Link>
             <!-- <a
                 class="tags__tag tag tag_deletable btn btn-secondary"
                 href="#"
@@ -69,6 +42,7 @@
 </template>
 <script>
 import { notify } from "@/util.js";
+import { Link } from "@inertiajs/vue3";
 export default {
     props: ["tags", "id"],
     methods: {

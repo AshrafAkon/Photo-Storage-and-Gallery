@@ -11,8 +11,8 @@
         </div>
         <div class="sidebar__body scrollbar">
             <div class="navigation list-group list-group-flush">
-                <Link v-for="item in menuItems" :key="item.route" :href="route(item.route)" :class="(currentRoute === item.route ? 'active ' : '') + classes
-                    " style="font-size: 1.1rem">
+                <Link v-for="item in menuItems" :key="item.route" :href="route(item.route)" :class="(currentRoute === item.route ? 'active' : '')
+                    " class="navigation__item list-group-item" style="font-size: 1.1rem">
                 {{ item.name }}
                 </Link>
                 <form action="logout" method="POST" v-on:submit.prevent="logout">
@@ -42,11 +42,9 @@
 import SidebarHelper from "../frontend/components/Sidebar";
 import { usePage, Link } from "@inertiajs/vue3";
 import { inject } from "@vue/runtime-core";
-
 export default {
-
+    components: { Link },
     setup(props) {
-        // console.log(usePage().props.value.notification_count);
         let notificationsName = "Notifications";
         const page = usePage();
         if (page.props.notification_count) {
@@ -93,7 +91,7 @@ export default {
     },
     data() {
         return {
-            classes: "navigation__item list-group-item",
+
             currentRoute: route().current(),
         };
     },

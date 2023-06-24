@@ -1,22 +1,11 @@
 <template>
-    <inertia-link
-        v-if="total"
-        :href="route('uploads.index')"
-        class="js-upload-bar upload-bar"
-    >
-        Uploading {{ filesArray.length }} photos ({{ remaining }} remaining)
-        <div class="upload-bar__progress progress">
-            <div
-                class="progress-bar"
-                role="progressbar"
-                id="master-progress-bar"
-                style="background-color: --bs-green"
-                :style="'width: ' + calculateProgressWidth"
-                aria-valuemin="0"
-                aria-valuemax="100"
-            ></div>
-        </div>
-    </inertia-link>
+    <Link v-if="total" :href="route('uploads.index')" class="js-upload-bar upload-bar">
+    Uploading {{ filesArray.length }} photos ({{ remaining }} remaining)
+    <div class="upload-bar__progress progress">
+        <div class="progress-bar" role="progressbar" id="master-progress-bar" style="background-color: --bs-green"
+            :style="'width: ' + calculateProgressWidth" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    </Link>
 </template>
 <style>
 .progress-bar {
@@ -24,13 +13,13 @@
 }
 </style>
 <script>
+import { Link } from "@inertiajs/vue3";
 import { inject } from "@vue/runtime-core";
 //:aria-valuenow="progressValue"
 export default {
     setup() {
         const filesArray = inject("filesArray");
         const total = inject("total");
-
         return {
             filesArray,
             total,
@@ -44,7 +33,6 @@ export default {
             remaining: "1h 23m",
         };
     },
-
     computed: {
         calculateProgressWidth() {
             let loaded = 0;
@@ -52,9 +40,9 @@ export default {
                 loaded += this.filesArray[i].loaded;
             }
             //
-
             return (loaded / this.total) * 100 + "%";
         },
     },
+    components: { Link }
 };
 </script>
