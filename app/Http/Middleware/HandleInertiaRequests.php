@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Notification;
 use Auth;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
-use App\Models\Notification;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -40,7 +40,7 @@ class HandleInertiaRequests extends Middleware
     {
         $shared = [
             'flash' => [
-                'success' => fn () => $request->session()->get('success')
+                'success' => fn() => $request->session()->get('success'),
             ],
             'notification_count' => Notification::where([['user_id', Auth::id()], ['seen', false]])->count(),
             'user' => $request->user(),
@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
         ];
 
         if (Auth::check() && !$request->header('X-Inertia')) {
-            $shared['sidebarMenuItems']  =  $this->permittedSidebarMenus();
+            $shared['sidebarMenuItems'] = $this->permittedSidebarMenus();
             $shared['permissions'] = request()->header('x-inertia') ? null : $request->user()->getCachedPermSlugs();
         }
         return array_merge(parent::share($request), $shared);
@@ -56,21 +56,20 @@ class HandleInertiaRequests extends Middleware
     public function permittedSidebarMenus()
     {
 
-
         $permitted_menu_items = [];
         $menu_items = [
             [
                 'name' => 'Trash',
-                'route' =>  'photos.trash'
+                'route' => 'photos.trash',
             ],
             [
                 'name' => 'Invitations',
-                'route' => 'invitations.index'
+                'route' => 'invitations.index',
             ],
             [
                 'name' => 'Roles',
-                'route' => 'roles.index'
-            ]
+                'route' => 'roles.index',
+            ],
             // 'invitations.index',
 
         ];

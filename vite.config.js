@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import vue from "@vitejs/plugin-vue";
+import VueDevtools from "vite-plugin-vue-devtools";
 export default defineConfig({
     plugins: [
         laravel([
@@ -9,6 +10,7 @@ export default defineConfig({
             "resources/js/vendor/pig.js",
             "resources/sass/main.scss",
         ]),
+        VueDevtools(),
         vue({
             template: {
                 transformAssetUrls: {
@@ -18,4 +20,9 @@ export default defineConfig({
             },
         }),
     ],
+    resolve: {
+        alias: {
+            "@": "resources/js",
+        },
+    },
 });

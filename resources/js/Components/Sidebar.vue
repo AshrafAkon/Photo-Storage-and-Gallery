@@ -1,51 +1,25 @@
 <template>
-    <aside
-        id="content-sidebar"
-        class="js-content-sidebar sidebar"
-        tabindex="-1"
-        aria-labelledby="sidebar"
-    >
+    <aside id="content-sidebar" class="js-content-sidebar sidebar" tabindex="-1" aria-labelledby="sidebar">
         <div class="sidebar__head">
-            <button
-                title="Close menu"
-                type="button"
-                class="
+            <button title="Close menu" type="button" class="
                     js-sidebar-toggle
                     sidebar__close
                     btn-subtle btn-lg btn-close
-                "
-                data-sidebar="#content-sidebar"
-                aria-label="Close"
-            >
+                " data-sidebar="#content-sidebar" aria-label="Close">
                 <span class="visually-hidden">Close menu</span>
             </button>
         </div>
         <div class="sidebar__body scrollbar">
             <div class="navigation list-group list-group-flush">
-                <inertia-link
-                    v-for="item in menuItems"
-                    :key="item.route"
-                    :href="route(item.route)"
-                    :class="
-                        (currentRoute === item.route ? 'active ' : '') + classes
-                    "
-                    style="font-size: 1.1rem"
-                >
-                    {{ item.name }}
-                </inertia-link>
-                <form
-                    action="logout"
-                    method="POST"
-                    v-on:submit.prevent="logout"
-                >
-                    <button
-                        type="submit"
-                        class="
+                <Link v-for="item in menuItems" :key="item.route" :href="route(item.route)" :class="(currentRoute === item.route ? 'active ' : '') + classes
+                    " style="font-size: 1.1rem">
+                {{ item.name }}
+                </Link>
+                <form action="logout" method="POST" v-on:submit.prevent="logout">
+                    <button type="submit" class="
                             navigation__item
                             list-group-item list-group-item-action
-                        "
-                        style="font-size: 1.1rem"
-                    >
+                        " style="font-size: 1.1rem">
                         Logout
                     </button>
                 </form>
@@ -66,17 +40,18 @@
 </style>
 <script>
 import SidebarHelper from "../frontend/components/Sidebar";
-import { usePage } from "@inertiajs/inertia-vue3";
+import { usePage, Link } from "@inertiajs/vue3";
 import { inject } from "@vue/runtime-core";
 
 export default {
+
     setup(props) {
         // console.log(usePage().props.value.notification_count);
         let notificationsName = "Notifications";
-        if (usePage().props.value.notification_count) {
-            notificationsName += ` (${
-                usePage().props.value.notification_count
-            })`;
+        const page = usePage();
+        if (page.props.notification_count) {
+            notificationsName += ` (${page.props.notification_count
+                })`;
         }
 
         const sidebarMenuItems = inject("sidebarMenuItems");
