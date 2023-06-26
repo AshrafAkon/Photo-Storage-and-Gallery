@@ -13,9 +13,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UploadController;
-use Aws\Account\AccountClient;
 use Illuminate\Support\Facades\Route;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -26,31 +24,26 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
 œ|
-*/
-
-
+ */
 
 /** All the routes that needs authentication */
 Route::middleware('auth')->group(function () {
     Route::get("/", [IndexController::class, 'index'])->name('home');
     Route::post("/fetch-more", [IndexController::class, 'fetch_more'])->name('index.fetch_more');
 
-
     /* Routes related to uploading files */
     Route::prefix('upload')->name("uploads.")->group(function () {
         Route::get("/", [UploadController::class, 'index'])->name('index');
         Route::post("store", [UploadController::class, 'store'])->name('store');
-        Route::post("store-file", [UploadController::class, 'storeFile'])->name('store_file');
+        Route::match (['put', 'post'], "store-file/{id}", [UploadController::class, 'storeFile'])->name('store_file');
         Route::post("cancel-upload", [UploadController::class, 'cancelUpload'])->name('cancel_upload');
         Route::post("update-details", [UploadController::class, 'updateDetails'])->name('update-details');
         Route::post("complete", [UploadController::class, 'completeUpload'])->name('complete');
     });
 
-
     Route::prefix('download')->name('downloads.')->group(function () {
         Route::post('generate-link', [DownloadController::class, 'generateLink'])->name('generate_link');
     });
-
 
     /* Routes related to photos */
     Route::prefix('photo')->name('photos.')->group(function () {

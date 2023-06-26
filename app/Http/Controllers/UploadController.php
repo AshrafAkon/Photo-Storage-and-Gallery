@@ -47,6 +47,7 @@ class UploadController extends Controller
      */
     public function store(Request $request)
     {
+        return $this->storeLocal($request);
 
         $files = $request->validate([
             '*.tempId' => 'required|integer',
@@ -88,6 +89,41 @@ class UploadController extends Controller
             $request = $s3Client->createPresignedRequest($cmd, now()->addMinutes(20));
             // Get the actual presigned-url
             $presignedUrl = (string) $request->getUri();
+
+            array_push($resp_data, ['tempId' => $file['tempId'], 'id' => $id, 'uploadUrl' => $presignedUrl]);
+        }
+        return $resp_data;
+    }
+
+    public function storeLocal(Request $request)
+    {
+
+        $files = $request->validate([
+            '*.tempId' => 'required|integer',
+            '*.title' => 'required|string',
+            '*.size' => 'required|integer',
+            '*.ext' => 'required|in:jpg,jpeg,png,psd',
+
+        ]);
+        // will save the file id as an array
+        // token will be used as key. From frontend
+        // we will use this token to match the correct
+        // photo id
+        $resp_data = [];
+
+        foreach ($files as $file) {
+            $fileName = bin2hex(random_bytes(32)) . '.' . $file['ext'];
+            $id = Photo::create([
+                'title' => $file['title'],
+                'user_id' => Auth::user()->id,
+                'size' => $file['size'],
+                'file_name' => $fileName,
+                // 'user_id' => Auth::user()->id,
+
+            ])->id;
+
+            // Get the actual presigned-url
+            $presignedUrl = route('uploads.store_file', ['id' => $id]);
 
             array_push($resp_data, ['tempId' => $file['tempId'], 'id' => $id, 'uploadUrl' => $presignedUrl]);
         }
@@ -140,12 +176,11 @@ class UploadController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function storeFile(Request $request)
+    public function storeFile(Request $request, Photo $photo)
     {
 
         $data = $request->validate([
             'file' => 'required|mimes:jpg,jpeg,png,zip,psd',
-            'id' => 'required|exists:photos,id',
 
         ]);
 
@@ -154,11 +189,10 @@ class UploadController extends Controller
         $imgsize = getimagesize($data['file']->getPathName());
         //Storage::disk('s3_fullsize')->putFile("full_size/", $fileName, $data['file'],);
 
-        $data['file']->storeAs("full_size/", $fileName, 's3_fullsize');
+        $data['file']->storeAs("full_size/", $fileName, 'local');
 
         // updating the photo entry
 
-        $photo = Photo::where("id", $data['id'])->first();
         $photo->update([
 
             'size' => $data['file']->getSize(),

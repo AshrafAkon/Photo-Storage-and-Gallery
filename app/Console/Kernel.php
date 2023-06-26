@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \ScoutEngines\Elasticsearch\Commands\CreateIndex::class,
+        \AshrafAkon\Elasticsearch\Commands\CreateIndex::class,
     ];
 
     /**

@@ -1,22 +1,16 @@
 <template>
     <div class="header__slot_actions header__slot">
-        <label
-            title="Upload"
-            class="
+        <label title="Upload" class="
                 js-upload
                 header__action-btn
                 button-file
                 btn btn-subtle btn-lg
-            "
-        >
+            ">
             <cloud-upload-icon></cloud-upload-icon>
             <span class="header__action-btn__txt">Upload</span>
-            <input
-                class="js-upload__input button-file__input"
-                type="file"
+            <input class="js-upload__input button-file__input" type="file"
                 accept="image/jpeg, image/png, image/gif, image/tiff, image/vnd.adobe.photoshop, .jpg, .jpeg, .png, .gif, .tif, .tiff, .psd"
-                multiple
-            />
+                multiple />
             <span class="visually-hidden">Upload more</span>
         </label>
     </div>
@@ -41,7 +35,7 @@ export default {
         const resetFuncs = inject("resetFuncs");
         const cancelToken = inject("cancelToken");
         const dropManager = new SingleImageDropManager();
-
+        const storageBackend = 'local';
         return {
             pushToFilesArray,
             filesArray,
@@ -52,6 +46,7 @@ export default {
             dropManager,
             resetFuncs,
             cancelToken,
+            storageBackend
         };
     },
     data() {
@@ -266,48 +261,45 @@ export default {
 
             const formData = new FormData();
             formData.append("file", this.filesArray[filePostion].file);
-            formData.append("id", this.filesArray[filePostion].id);
+            // formData.append("id", this.filesArray[filePostion].id);
 
             // uploading the file
-            axios
-                .put(
-                    this.filesArray[filePostion].uploadUrl,
-                    this.filesArray[filePostion].file,
-                    {
-                        cancelToken:
-                            this.filesArray[filePostion].cancelSource.token,
-                        // cancelToken: this.cancelToken.token,
-                        onUploadProgress: (e) => {
-                            // bug
-                            this.filesArray[filePostion].loaded = e.loaded;
-                            this.filesArray[filePostion].width =
-                                (e.loaded / e.total) * 98 + "%";
-                        },
-                    }
-                )
-                .then((response) => {
-                    // this will be used to show the tick on individual
-                    // files on /upload page
-                    this.filesArray[filePostion].uploadCompleted = true;
+            axios({
+                url: this.filesArray[filePostion].uploadUrl,
+                method: this.storageBackend === 'aws' ? 'put' : 'post',
+                data: this.storageBackend === 'aws' ? this.filesArray[filePostion].file : formData,
+
+                cancelToken:
+                    this.filesArray[filePostion].cancelSource.token,
+                // cancelToken: this.cancelToken.token,
+                onUploadProgress: (e) => {
                     // bug
-                    this.sendUploadCompletedReq(filePostion);
-                })
-                .catch((error) => {
-                    // We shouldnt retry if upload is cancelled by user
-                    if (!axios.isCancel(error)) {
-                        console.log(error);
-                        if (retry == false) {
-                            this.uploadSingleFile(filePostion, (retry = true));
-                        } else {
-                            // Show error notification to user
-                            notify(
-                                "Upload Failed: " +
-                                    this.filesArray[filePostion].title,
-                                "danger"
-                            );
-                        }
+                    this.filesArray[filePostion].loaded = e.loaded;
+                    this.filesArray[filePostion].width =
+                        (e.loaded / e.total) * 98 + "%";
+                },
+            }).then((response) => {
+                // this will be used to show the tick on individual
+                // files on /upload page
+                this.filesArray[filePostion].uploadCompleted = true;
+                // bug
+                this.sendUploadCompletedReq(filePostion);
+            }).catch((error) => {
+                // We shouldnt retry if upload is cancelled by user
+                if (!axios.isCancel(error)) {
+                    console.log(error);
+                    if (retry == false) {
+                        this.uploadSingleFile(filePostion, (retry = true));
+                    } else {
+                        // Show error notification to user
+                        notify(
+                            "Upload Failed: " +
+                            this.filesArray[filePostion].title,
+                            "danger"
+                        );
                     }
-                });
+                }
+            });
         },
         sendUploadCompletedReq(pos) {
             axios
