@@ -18,7 +18,7 @@ class Photo extends Model
         'title', 'size', 'height',
         'width', 'parent_id', 'user_id',
         'file_type', 'file_name',
-        'sha256', 'dhash'
+        'sha256', 'dhash',
     ];
     private $awsS3V4 = null;
 
@@ -43,8 +43,8 @@ class Photo extends Model
         return $this->belongsToMany(Photo::class, 'parent_id', 'derived_id')->using(\App\models\Pivots\Derivative::class)->withTimestamps();
     }
     /*
-    * The parent of this photo
-    */
+     * The parent of this photo
+     */
     public function parent()
     {
         return $this->hasOne(Photo::class, 'parent_id');
@@ -121,15 +121,14 @@ class Photo extends Model
     public function addTempUrl($file_version, $bucket = null, $property = 'src', $headers = [], $expiresIn = 21600)
     {
 
-
         if (!$bucket) {
             $bucket = config('aws.fullsize_bucket');
         }
 
         if (!$this->awsS3V4) {
-            $this->awsS3V4 = new \App\Utils\AwsS3V4($expiresIn);
+            $this->awsS3V4 = new \App\Utils\AwsS3V4 ($expiresIn);
         }
-        $this->$property =  $this->awsS3V4->presignGet($this->genFullPath($file_version), $bucket, $headers);
+        $this->$property = $this->awsS3V4->presignGet($this->genFullPath($file_version), $bucket, $headers);
     }
 
     protected function makeAllSearchableUsing($query)
@@ -146,7 +145,6 @@ class Photo extends Model
     {
         $array = $this->toArray();
 
-
         $searchableArray = [
             'title' => $array['title'],
         ];
@@ -161,5 +159,10 @@ class Photo extends Model
             $searchableArray['license'] = $array['license'];
         }
         return $searchableArray;
+    }
+
+    public static function random_name()
+    {
+        return bin2hex(random_bytes(32));
     }
 }

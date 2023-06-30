@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\DuplicateController;
+use App\Http\Controllers\FileStorageController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InvitationController;
 // use App\Http\Controllers\InvitationSignupController;
@@ -34,7 +35,7 @@ Route::middleware('auth')->group(function () {
     /* Routes related to uploading files */
     Route::prefix('upload')->name("uploads.")->group(function () {
         Route::get("/", [UploadController::class, 'index'])->name('index');
-        Route::post("store", [UploadController::class, 'store'])->name('store');
+        Route::post("store", [FileStorageController::class, 'store'])->name('store');
         Route::match (['put', 'post'], "store-file/{id}", [UploadController::class, 'storeFile'])->name('store_file');
         Route::post("cancel-upload", [UploadController::class, 'cancelUpload'])->name('cancel_upload');
         Route::post("update-details", [UploadController::class, 'updateDetails'])->name('update-details');
@@ -45,7 +46,7 @@ Route::middleware('auth')->group(function () {
         Route::post('generate-link', [DownloadController::class, 'generateLink'])->name('generate_link');
     });
 
-    /* Routes related to photos */
+    /* Photo Routes */
     Route::prefix('photo')->name('photos.')->group(function () {
         Route::post('delete', [PhotoController::class, 'destroy'])->name('delete');
         Route::post('get-info', [PhotoController::class, 'getInfo'])->name('get_info');

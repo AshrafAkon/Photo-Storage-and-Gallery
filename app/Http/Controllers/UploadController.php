@@ -171,61 +171,6 @@ class UploadController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function storeFile(Request $request, Photo $photo)
-    {
-
-        $data = $request->validate([
-            'file' => 'required|mimes:jpg,jpeg,png,zip,psd',
-
-        ]);
-
-        // generating a random filename for photo
-        $fileName = bin2hex(random_bytes(32)) . '.' . $data['file']->getClientOriginalExtension();
-        $imgsize = getimagesize($data['file']->getPathName());
-        //Storage::disk('s3_fullsize')->putFile("full_size/", $fileName, $data['file'],);
-
-        $data['file']->storeAs("full_size/", $fileName, 'local');
-
-        // updating the photo entry
-
-        $photo->update([
-
-            'size' => $data['file']->getSize(),
-            'height' => $imgsize[1],
-            'width' => $imgsize[0],
-            'file_type' => $data['file']->getClientMimeType(),
-
-            'should_process' => false,
-
-        ]);
-
-        // $full_image = Image::make($data['file']->path());
-        // // resizes the image to have 200px width and preserves aspectRatio
-        // $resizedImage = $full_image->resize(null, 200, function ($constraint) {
-        //     $constraint->aspectRatio();
-        // })->stream();
-        // Storage::disk('local')->put('thumbnail/' . $fileName, $resizedImage->__toString());
-
-        // $resizedImage = $full_image->resize(null, 1000, function ($constraint) {
-        //     $constraint->aspectRatio();
-        // })->encode(
-        //     'jpeg',
-        //     75
-        // )->stream();
-        // Storage::disk('local')->put('preview/' . $fileName, $resizedImage->__toString());
-
-        // to-do
-        // move label detection code to queue
-        //$credentials = new Credentials(config('services.ses.key'), config('services.ses.secret'));
-
-        return http_response_code(204);
-    }
-    /**
      * Cancel an upload while its still uploading
      * This function will be used from cancel button
      * in /upload page
